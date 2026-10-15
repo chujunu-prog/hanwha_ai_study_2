@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#10162b" />
+    <title>코트사이드 슛</title>
+    <style>
+      :root { color-scheme: dark; --ink:#eaf0ff; --muted:#9ba6c3; --navy:#10162b; --panel:#171f38; --line:rgba(235,241,255,.16); --orange:#ff7a25; --lime:#b8ff5c; }
+      * { box-sizing:border-box; } body { margin:0; min-height:100vh; display:grid; place-items:center; background:radial-gradient(circle at 50% -10%,#273867 0,transparent 38%),linear-gradient(135deg,#090d1c,#131a31); font-family:system-ui,sans-serif; color:var(--ink); }.game-shell { width:min(1120px,96vw); padding:22px 18px 20px; } header { display:flex; align-items:center; justify-content:space-between; margin:0 6px 17px; }.brand { display:flex; align-items:baseline; gap:8px; letter-spacing:.12em; font:17px 'Arial Black',Impact,sans-serif; }.brand strong { color:var(--orange); }.ball-mark { color:var(--orange); font-size:27px; line-height:0; text-shadow:0 0 18px #ff7a25; }
+      .scoreboard { display:flex; align-items:center; gap:15px; font-family:ui-monospace,monospace; }.scoreboard div { min-width:67px; }.scoreboard small,.card-kicker { display:block; color:var(--muted); font:10px ui-monospace,monospace; letter-spacing:.16em; }.scoreboard b { display:block; margin-top:2px; font-size:20px; }.scoreboard i { width:1px;height:29px;background:var(--line); }.arena { position:relative; overflow:hidden; border:1px solid var(--line); border-radius:18px; background:#182341; box-shadow:0 26px 70px rgba(0,0,0,.3); }.arena::after { content:''; position:absolute; inset:auto 0 0; height:34%; pointer-events:none; background:linear-gradient(transparent,rgba(4,7,16,.22)); } canvas { display:block; width:100%; height:auto; aspect-ratio:1100/620; }
+      .shot-message { position:absolute; left:50%; top:15%; transform:translateX(-50%); font:clamp(24px,3.8vw,48px) 'Arial Black',Impact,sans-serif; letter-spacing:.04em; color:rgba(235,240,255,.8); text-shadow:0 4px 0 rgba(9,13,28,.23); transition:opacity .25s,transform .25s; pointer-events:none; }.shot-message.flash { color:var(--lime); transform:translateX(-50%) scale(1.14); }.shot-message.miss { color:#ffb070; }.rim-label { position:absolute; bottom:52px; left:71%; color:rgba(230,237,255,.28); font:9px ui-monospace,monospace; letter-spacing:.12em; transform:translateX(-50%); pointer-events:none; }
+      .controls { display:grid; grid-template-columns:1fr 1.8fr 1fr; gap:12px; margin-top:14px; }.control-card { min-height:104px; padding:14px 17px; border:1px solid var(--line); border-radius:12px; background:rgba(25,33,60,.73); }.control-card p { margin:10px 0 0; color:var(--muted); font-size:12px; }.aim-display { display:flex; gap:9px; align-items:center; margin-top:5px; font-family:'DM Mono',monospace; font-size:25px; }.compass { color:var(--orange); transition:transform .12s; }.power-track { position:relative; height:22px; margin-top:13px; border:1px solid #67738f; border-radius:4px; overflow:hidden; background:linear-gradient(90deg,#dd3e45 0%,#ef6843 20%,#ffb949 43%,#aaff61 64%,#aaff61 81%,#ffae45 90%,#df3d48 100%); box-shadow:inset 0 0 0 1px rgba(12,18,39,.25); }.power-track::before { content:''; position:absolute;z-index:1;inset:0; background:repeating-linear-gradient(90deg,transparent 0 9.1%,rgba(14,21,44,.42) 9.1% 10%); }.power-track::after { content:''; position:absolute; z-index:2; top:1px;bottom:1px;left:64%;width:17%; background:rgba(184,255,92,.18); border-inline:1px solid rgba(214,255,165,.96); }.power-track span { position:absolute; z-index:1; inset:0 auto 0 0; width:0%; background:#e84b49; box-shadow:inset 0 -2px 0 rgba(255,255,255,.22),0 0 10px rgba(255,255,255,.18); transition:width .04s,background .09s; }.power-track span::after { content:''; position:absolute; z-index:4; top:-1px; bottom:-1px; right:0; width:3px; background:#030407; box-shadow:0 0 0 1px rgba(255,255,255,.16),0 0 6px rgba(0,0,0,.9); }.power-track em { position:absolute; z-index:3; inset:2px 0 0; text-align:center; color:#ffffff; font:10px 'DM Mono',monospace; font-style:normal; letter-spacing:.12em; text-shadow:0 1px 3px #11162b; }.tip-card p { margin-top:8px; font-size:11px; }kbd { display:inline-grid; place-items:center; min-width:20px; height:18px; margin-right:3px; padding:0 4px; border:1px solid #6d7a9b; border-bottom-width:2px; border-radius:3px; color:#fff; font:10px 'DM Mono',monospace; }.footer-note { margin:13px 0 0; text-align:center; color:#687493; font:10px 'DM Mono',monospace; letter-spacing:.13em; }
+      @media (max-width:650px) { .game-shell{padding:12px 8px;} header{margin:0 4px 12px}.brand{font-size:13px}.scoreboard{gap:9px}.scoreboard b{font-size:16px}.controls{grid-template-columns:1fr 1fr}.power-card{grid-column:span 2;order:-1}.control-card{min-height:92px;padding:12px}.tip-card p{font-size:10px}.shot-message{top:9%}.rim-label{bottom:30px} }
+    </style>
+  </head>
+  <body>
+    <main class="game-shell">
+      <header>
+        <div class="brand"><span class="ball-mark">●</span><span>HANWHA</span><strong>SHOOOOOT</strong></div>
+        <div class="scoreboard" aria-label="게임 점수">
+          <div><small>SCORE</small><b id="score">000</b></div>
+          <i></i>
+          <div><small>STREAK</small><b id="streak">× 0</b></div>
+        </div>
+      </header>
+
+      <section class="arena" aria-label="농구 슛 게임">
+        <canvas id="court" width="1100" height="620" aria-label="농구 코트"></canvas>
+        <div class="shot-message" id="shotMessage" aria-live="polite">READY?</div>
+        <div class="rim-label">3 POINT LINE</div>
+      </section>
+
+      <section class="controls">
+        <div class="control-card aim-card">
+          <div class="card-kicker">DIRECTION</div>
+          <div class="aim-display"><span class="compass">↗</span><span id="angle">52°</span></div>
+          <p>← → 로 0°–90° 조절</p>
+        </div>
+        <div class="control-card power-card">
+          <div class="card-kicker">SHOT POWER</div>
+          <div class="power-track" aria-label="슛 파워"><span id="powerFill"></span><em id="powerText">HOLD SPACE</em></div>
+          <p>스페이스바를 길게 눌러 힘을 모으세요</p>
+        </div>
+        <div class="control-card tip-card">
+          <div class="card-kicker">HOW TO PLAY</div>
+          <p><kbd>←</kbd><kbd>→</kbd> 방향 조절</p>
+          <p><kbd>SPACE</kbd> 홀드 후 놓기</p>
+        </div>
+      </section>
+      <p class="footer-note">PERFECT RELEASE · 초록 영역에서 놓으면 더 정확해집니다</p>
+    </main>
+    <script>
+      const canvas = document.querySelector('#court'), ctx = canvas.getContext('2d');
+      const scoreEl = document.querySelector('#score'), streakEl = document.querySelector('#streak'), angleEl = document.querySelector('#angle'), fillEl = document.querySelector('#powerFill'), powerText = document.querySelector('#powerText'), message = document.querySelector('#shotMessage'), compass = document.querySelector('.compass');
+      const W=1100,H=620,hoop={x:780,y:220},start={x:225,y:485}; let angle=52,power=0,charging=false,shot=null,score=0,streak=0,last=performance.now(),time=0,sparks=[],trail=[];
+      const powerColor=v=>v>=64&&v<=81?'#aaff61':v>=49&&v<64?'#ffd05b':v>81&&v<=90?'#ffbd4e':'#e84b49';
+      function line(x1,y1,x2,y2,c,w=2){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()} function circle(x,y,r,f,s){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);if(f){ctx.fillStyle=f;ctx.fill()}if(s){ctx.strokeStyle=s;ctx.stroke()}} function rect(x,y,w,h,r,f){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=f;ctx.fill()}
+      function court(){const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#263e70');sky.addColorStop(.54,'#617eb0');sky.addColorStop(.55,'#d08d5d');sky.addColorStop(1,'#a8502d');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(12,22,47,.48)';for(let x=-10;x<W;x+=42){const h=30+(x*13%64+64)%64;ctx.fillRect(x,190-h,34,h)}ctx.fillStyle='rgba(16,27,53,.45)';for(let y=190;y<300;y+=18)line(0,y,W,y,'rgba(255,255,255,.08)',2);const floor=ctx.createLinearGradient(0,310,0,H);floor.addColorStop(0,'#e6a55e');floor.addColorStop(1,'#bd542f');ctx.fillStyle=floor;ctx.fillRect(0,310,W,H);for(let x=-50;x<W;x+=120)line(x,310,x+115,H,'rgba(99,40,26,.14)',4);line(0,310,W,310,'rgba(255,226,186,.55)',3);ctx.strokeStyle='rgba(255,238,206,.64)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(780,490,218,Math.PI,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.arc(780,490,87,Math.PI,Math.PI*2);ctx.stroke();line(693,490,867,490,'rgba(255,238,206,.64)',3);ctx.fillStyle='#1b2542';ctx.fillRect(837,130,17,222);ctx.fillStyle='#0f1830';ctx.fillRect(698,108,165,100);ctx.strokeStyle='#e9effe';ctx.lineWidth=4;ctx.strokeRect(698,108,165,100);ctx.strokeRect(756,132,48,32);const sh=ctx.createRadialGradient(780,251,5,780,251,86);sh.addColorStop(0,'rgba(4,9,23,.38)');sh.addColorStop(1,'rgba(4,9,23,0)');ctx.fillStyle=sh;ctx.fillRect(690,215,180,70);ctx.strokeStyle='#f15125';ctx.lineWidth=8;ctx.beginPath();ctx.ellipse(780,232,47,11,0,0,Math.PI*2);ctx.stroke();for(let i=0;i<6;i++)line(741+i*16,236,748+i*12,274,'rgba(240,242,245,.75)',2);line(748,274,812,274,'rgba(240,242,245,.68)',2)}
+      function player(){circle(203,403,24,'#f4b778');ctx.fillStyle='#111b35';ctx.beginPath();ctx.arc(203,397,25,Math.PI,0);ctx.fill();rect(175,429,58,88,12,'#24335d');ctx.fillStyle='#eff4ff';ctx.font='bold 21px Arial';ctx.fillText('33',189,474);line(184,514,168,567,'#16203e',19);line(223,514,238,567,'#16203e',19);line(177,448,152,475,'#f4b778',13);line(230,449,247,466,'#f4b778',13)}
+      function ball(x,y){ctx.save();ctx.translate(x,y);circle(0,0,18,'#f47a2a','#6f2c17');ctx.lineWidth=1.5;ctx.strokeStyle='#733019';ctx.beginPath();ctx.arc(0,0,18,-1.15,1.15);ctx.stroke();ctx.beginPath();ctx.arc(0,0,18,2,4.2);ctx.stroke();line(-18,0,18,0,'#733019',1.5);line(0,-18,0,18,'#733019',1.5);ctx.restore()}
+      function aim(){if(shot||charging)return;const r=-angle*Math.PI/180,L=132,x=start.x+Math.cos(r)*L,y=start.y+Math.sin(r)*L;ctx.setLineDash([6,7]);line(start.x,start.y,x,y,'rgba(245,249,255,.72)',2);ctx.setLineDash([]);ctx.fillStyle='#f6fbff';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-10*Math.cos(r-.5),y-10*Math.sin(r-.5));ctx.lineTo(x-10*Math.cos(r+.5),y-10*Math.sin(r+.5));ctx.fill()}
+      function notify(t,k=''){message.textContent=t;message.className='shot-message '+k;message.style.opacity='1';clearTimeout(notify.t);notify.t=setTimeout(()=>{message.style.opacity='.65';if(t!=='READY?')message.textContent='READY?';message.className='shot-message'},1000)}
+      function shoot(){if(shot)return;if(power<8){charging=false;power=0;fillEl.style.width='0%';powerText.textContent='HOLD SPACE';return}const release=power,r=-angle*Math.PI/180,speed=10+release*.115;charging=false;shot={x:start.x+20,y:start.y-18,vx:Math.cos(r)*speed,vy:Math.sin(r)*speed,scored:false,rimCooldown:0};trail=[];power=0;fillEl.style.width='0%';powerText.textContent='FLY!';notify(release>64&&release<81?'PERFECT!':'SHOOT!')}
+      function rimBounce(b){if(b.rimCooldown>0)return;for(const c of[{x:hoop.x-43,y:hoop.y+1},{x:hoop.x+43,y:hoop.y+1}]){const dx=b.x-c.x,dy=b.y-c.y,d=Math.hypot(dx,dy),m=24;if(d>=m||!d)continue;const nx=dx/d,ny=dy/d,hit=b.vx*nx+b.vy*ny;if(hit>=0)continue;b.x=c.x+nx*m;b.y=c.y+ny*m;b.vx=(b.vx-1.62*hit*nx)*.78;b.vy=(b.vy-1.62*hit*ny)*.78;b.rimCooldown=70;sparks.push({x:b.x,y:b.y,vx:nx*3+(Math.random()-.5)*2,vy:ny*3-2,life:.55});break}}
+      function update(dt){if(charging&&!shot){power+=dt*.085;if(power>100)power=0;fillEl.style.width=power+'%';fillEl.style.background=powerColor(power);powerText.textContent=Math.round(power)+'%'}if(shot){const b=shot,py=b.y;b.x+=b.vx*dt*.06;b.y+=b.vy*dt*.06;b.vy+=.34*dt*.06;b.rimCooldown-=dt;rimBounce(b);trail.push({x:b.x,y:b.y,a:1});trail=trail.slice(-18);trail.forEach(p=>p.a-=.045);if(!b.scored&&b.vy>0&&py<hoop.y+3&&b.y>=hoop.y+3&&Math.abs(b.x-hoop.x)<35){b.scored=true;streak++;const mult=streak>=10?3:streak>=5?2:1,pts=3*mult;score+=pts;scoreEl.textContent=String(score).padStart(3,'0');streakEl.textContent='× '+streak+(mult>1?' · '+mult+'X':'');notify('SWISH! +'+pts+(mult>1?' ('+mult+'X)':''),'flash');for(let i=0;i<25;i++)sparks.push({x:hoop.x,y:hoop.y+15,vx:(Math.random()-.5)*6,vy:-Math.random()*5,life:1})}if(b.y>H+55||b.x>W+50){if(!b.scored){streak=0;streakEl.textContent='× 0';notify('MISS','miss')}shot=null;trail=[];powerText.textContent='HOLD SPACE'}}sparks.forEach(s=>{s.life-=.02;s.x+=s.vx;s.y+=s.vy;s.vy+=.06});sparks=sparks.filter(s=>s.life>0)}
+      function render(){ctx.clearRect(0,0,W,H);court();player();aim();trail.forEach((p,i)=>circle(p.x,p.y,Math.max(2,i*.2),'rgba(255,222,155,'+(i/40)+')'));if(shot)ball(shot.x,shot.y);else ball(start.x+35,start.y-38);sparks.forEach(s=>circle(s.x,s.y,Math.max(0,s.life*4),'rgba(190,255,103,'+s.life+')'))}function loop(n){const d=Math.min(32,n-last);last=n;update(d);render();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+      function adjust(d){if(shot)return;angle=Math.max(0,Math.min(90,angle+d));angleEl.textContent=angle+'°';compass.style.transform='rotate('+((angle-52)*1.5)+'deg)'}window.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();if(e.code==='ArrowLeft')adjust(-1);if(e.code==='ArrowRight')adjust(1);if(e.code==='Space'&&!charging&&!shot){charging=true;notify('CHARGE')}},{passive:false});window.addEventListener('keyup',e=>{if(e.code==='Space'&&charging)shoot()});canvas.addEventListener('pointerdown',()=>{if(!charging&&!shot){charging=true;notify('CHARGE')}});window.addEventListener('pointerup',()=>{if(charging)shoot()});
+    </script>
+  </body>
+</html>
